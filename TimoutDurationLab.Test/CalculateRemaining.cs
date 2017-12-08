@@ -35,7 +35,7 @@ namespace TimoutDurationLab.Test
 
             SystemTime.Set(DateTime.Parse("2017-01-01 18:00:00"));
 
-            a.CalculateRemainingTimeoutDuration();
+            a.SetRemainingTimeoutDuration();
 
             expected = TimeSpan.FromHours(18);
             Assert.Equal(expected, a.TimeoutDuration);
@@ -60,7 +60,7 @@ namespace TimoutDurationLab.Test
 
             SystemTime.Set(DateTime.Parse("2017-01-01 20:00:00"));
 
-            a.CalculateRemainingTimeoutDuration();
+            a.SetRemainingTimeoutDuration();
 
             expected = TimeSpan.FromHours(16);
             Assert.Equal(expected, a.TimeoutDuration);
