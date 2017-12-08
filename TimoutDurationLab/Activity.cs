@@ -9,9 +9,27 @@ namespace TimoutDurationLab
     public class Activity
     {
 
-        public void SetRemainingTimeoutDuration()
+        public void Run()
         {
-            var duration = CalculateRemainingDuration();
+            InitializeDuration();
+            InitializeStartDelay();
+        }
+
+
+        public void Call()
+        {
+            SetRemainingTimeoutDuration();
+        }
+
+
+
+        private void SetRemainingTimeoutDuration()
+        {
+            var now = SystemTime.Now();
+
+            // Calculate remaining duration
+            var duration = EndDate.Value.Date.AddDays(1) - now.Date;
+            duration = duration.Add(StartDate.Value - now);
 
             if (SendReminder && !ReminderSent)
             {
@@ -23,17 +41,7 @@ namespace TimoutDurationLab
             }
         }
 
-        private TimeSpan CalculateRemainingDuration()
-        {
-            var now = SystemTime.Now();
-
-            // Calculate remaining duration
-            var duration = EndDate.Value.Date.AddDays(1) - now.Date;
-            duration.Add(StartDate.Value - now);
-            return duration;
-        }
-
-        public void InitializeDuration()
+        private void InitializeDuration()
         {
             var now = SystemTime.Now();
 
@@ -83,7 +91,7 @@ namespace TimoutDurationLab
         }
 
 
-        public void InitializeStartDelay()
+        private void InitializeStartDelay()
         {
             var now = SystemTime.Now();
 

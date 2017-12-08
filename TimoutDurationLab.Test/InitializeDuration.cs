@@ -27,8 +27,8 @@ namespace TimoutDurationLab.Test
                 EndDate = SystemTime.Now().Date.AddDays(1)
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(40);
@@ -48,8 +48,8 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             _testOutput.WriteLine(a.TimeoutDuration.ToString());
@@ -66,8 +66,8 @@ namespace TimoutDurationLab.Test
 
             var a = new Activity();
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             _testOutput.WriteLine(a.TimeoutDuration.ToString());
@@ -87,8 +87,8 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             _testOutput.WriteLine(a.TimeoutDuration.ToString());
@@ -109,8 +109,8 @@ namespace TimoutDurationLab.Test
                 EndDate = SystemTime.Now().Date.AddDays(1)
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             _testOutput.WriteLine(a.TimeoutDuration.ToString());
@@ -132,8 +132,8 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
+
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             _testOutput.WriteLine(a.TimeoutDuration.ToString());
@@ -150,11 +150,8 @@ namespace TimoutDurationLab.Test
 
             var a = new Activity();
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
-
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
 
             var expected = TimeSpan.FromHours(35);
             Assert.Equal(expected, a.TimeoutDuration);
@@ -171,11 +168,9 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
             var expected = TimeSpan.FromHours(23);
             Assert.Equal(expected, a.TimeoutDuration);
 
@@ -194,8 +189,7 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(4));
@@ -216,8 +210,7 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(4));
@@ -236,8 +229,7 @@ namespace TimoutDurationLab.Test
                 TotalTimeoutDuration = TimeSpan.FromDays(7),
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
@@ -256,8 +248,7 @@ namespace TimoutDurationLab.Test
                 TotalTimeoutDuration = TimeSpan.FromDays(7),
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(7));
@@ -278,8 +269,7 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(7));
@@ -300,8 +290,7 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
@@ -323,8 +312,7 @@ namespace TimoutDurationLab.Test
                 SendReminder = true
             };
 
-            a.InitializeDuration();
-            a.InitializeStartDelay();
+            a.Run();
             _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
