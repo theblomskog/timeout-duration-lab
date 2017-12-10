@@ -28,14 +28,14 @@ namespace TimoutDurationLab.Test
             {
                 SendReminder = true
             };
-            a.InitializeDuration();
+            a.Run();
 
             var expected = TimeSpan.FromHours(28);
             Assert.Equal(expected, a.TimeoutDuration);
 
             SystemTime.Set(DateTime.Parse("2017-01-01 18:00:00"));
 
-            a.SetRemainingTimeoutDuration();
+            a.Call();
 
             expected = TimeSpan.FromHours(18);
             Assert.Equal(expected, a.TimeoutDuration);
@@ -53,20 +53,33 @@ namespace TimoutDurationLab.Test
             {
                 SendReminder = true
             };
-            a.InitializeDuration();
+            a.Run();
 
             var expected = TimeSpan.FromHours(23);
             Assert.Equal(expected, a.TimeoutDuration);
 
             SystemTime.Set(DateTime.Parse("2017-01-01 20:00:00"));
 
-            a.SetRemainingTimeoutDuration();
+            a.Call();
 
             expected = TimeSpan.FromHours(16);
             Assert.Equal(expected, a.TimeoutDuration);
 
 
             SystemTime.Reset();
+        }
+
+        [Fact]
+        public void StartDate_And_Call()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            var a = new Activity
+            {
+                StartDate = DateTime.Parse("2017-01-0 00:00:00"),
+                SendReminder = true
+            };
+            a.Run();
         }
     }
 }

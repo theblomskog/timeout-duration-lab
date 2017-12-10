@@ -11,8 +11,10 @@ namespace TimoutDurationLab
 
         public void Run()
         {
-            InitializeDuration();
             InitializeStartDelay();
+
+            InitializeDuration();
+            
         }
 
 
@@ -97,6 +99,8 @@ namespace TimoutDurationLab
 
             if (null != StartDate && StartDate.Value > now.Date)
             {
+
+                // TODO:
                 var deltaTimeToMidnight = StartDate.Value.Subtract(now);
                 StartDelay = deltaTimeToMidnight;
             }
