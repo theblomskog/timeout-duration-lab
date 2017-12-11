@@ -11,10 +11,8 @@ namespace TimoutDurationLab
 
         public void Run()
         {
-            InitializeStartDelay();
-
             InitializeDuration();
-            
+
         }
 
 
@@ -30,16 +28,16 @@ namespace TimoutDurationLab
             var now = SystemTime.Now();
 
             // Calculate remaining duration
-            var duration = EndDate.Value.Date.AddDays(1) - now.Date;
-            duration = duration.Add(StartDate.Value - now);
+            var timeOfday = now.TimeOfDay;
+            var duration = EndDate.Value - StartDate.Value - now.TimeOfDay;
 
             if (SendReminder && !ReminderSent)
             {
-                TimeoutDuration = duration - ReminderTimeoutDuration;
+                TimeoutDuration = TimeoutDuration - duration - ReminderTimeoutDuration;
             }
             else
             {
-                TimeoutDuration = duration;
+                TimeoutDuration = TimeoutDuration - duration;
             }
         }
 
@@ -57,33 +55,18 @@ namespace TimoutDurationLab
                 StartDate = StartDate.Value.Date;
             }
 
-            // calculate delta time to midnight
-            var deltaTimeToMidnight = StartDate.Value - now ;
-            if (null != EndDate)
-            {
-                // Sanitize. just in case
-                EndDate = EndDate.Value.Date;
 
-                var duration = EndDate.Value.Date.AddDays(1) - now.Date;
-                TotalTimeoutDuration = duration.Add(deltaTimeToMidnight);
+            if (StartDate.Value > now.Date)
+            {
+                StartDelayTimeoutDurationy = StartDate.Value - now;
+                SetTimeoutDuration(default(TimeSpan));
             }
             else
             {
-                var duration = deltaTimeToMidnight.Add(TimeSpan.FromDays(1));
-                TotalTimeoutDuration = TotalTimeoutDuration.Add(duration);
-
-                EndDate = now.Date.Add(TotalTimeoutDuration).Date;
+                var timeOfDay = now.TimeOfDay;
+                SetTimeoutDuration(timeOfDay);
             }
 
-
-            if(SendReminder)
-            {
-                TimeoutDuration = TotalTimeoutDuration - ReminderTimeoutDuration;
-            }
-            else
-            {
-                TimeoutDuration = TotalTimeoutDuration;
-            }
 
             if (TimeoutDuration < TimeSpan.Zero)
             {
@@ -92,28 +75,49 @@ namespace TimoutDurationLab
 
         }
 
-
-        private void InitializeStartDelay()
+        private void SetTimeoutDuration(TimeSpan timeOfDay)
         {
-            var now = SystemTime.Now();
+            if (null != EndDate)
+            {
+                // sanity check just in case. End date has time part
+                EndDate = EndDate.Value.Date;
 
-            if (null != StartDate && StartDate.Value > now.Date)
+                TotalTimeoutDuration = EndDate.Value.AddDays(1) - StartDate.Value;
+            }
+            else
+            {
+                var now = SystemTime.Now();
+                EndDate = now.Add(TotalTimeoutDuration + StartDelayTimeoutDurationy + timeOfDay).Date;
+            }
+
+            if (SendReminder)
             {
 
-                // TODO:
-                var deltaTimeToMidnight = StartDate.Value.Subtract(now);
-                StartDelay = deltaTimeToMidnight;
+                TimeoutDuration = TotalTimeoutDuration - timeOfDay - ReminderTimeoutDuration;
+            }
+            else
+            {
+                TimeoutDuration = TotalTimeoutDuration - timeOfDay;
             }
         }
+    
 
+        public bool IsStarted
+        {
+            get
+            {
+                var now = SystemTime.Now();
+                return StartDate.Value <= now.Date;
+            }
+        }
 
         public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
 
-        public TimeSpan ReminderTimeoutDuration { get; set; } = TimeSpan.FromHours(12);
+        public TimeSpan ReminderTimeoutDuration { get; set; }// = TimeSpan.FromHours(12);
 
-        public TimeSpan TotalTimeoutDuration { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan TotalTimeoutDuration { get; set; }// = TimeSpan.FromDays(1);
 
         public TimeSpan TimeoutDuration { get; set; }
 
@@ -121,7 +125,7 @@ namespace TimoutDurationLab
         
         public bool ReminderSent { get; set; }
 
-        public TimeSpan StartDelay { get; set; }
+        public TimeSpan StartDelayTimeoutDurationy { get; set; }
     }
 }
 

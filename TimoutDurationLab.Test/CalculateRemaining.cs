@@ -26,18 +26,22 @@ namespace TimoutDurationLab.Test
 
             var a = new Activity
             {
+                TotalTimeoutDuration = TimeSpan.FromDays(1),
+                ReminderTimeoutDuration = TimeSpan.FromHours(12),
                 SendReminder = true
             };
             a.Run();
 
-            var expected = TimeSpan.FromHours(28);
+            
+            var expected = TimeSpan.FromHours(4);
             Assert.Equal(expected, a.TimeoutDuration);
 
             SystemTime.Set(DateTime.Parse("2017-01-01 18:00:00"));
 
+            a.ReminderSent = true;
             a.Call();
 
-            expected = TimeSpan.FromHours(18);
+            expected = TimeSpan.FromHours(6);
             Assert.Equal(expected, a.TimeoutDuration);
 
 
@@ -47,39 +51,31 @@ namespace TimoutDurationLab.Test
         [Fact]
         public void Test_13()
         {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+            SystemTime.Set(DateTime.Parse("2017-01-01 11:00:00"));
 
             var a = new Activity
             {
+                TotalTimeoutDuration = TimeSpan.FromDays(1),
+                ReminderTimeoutDuration = TimeSpan.FromHours(12),
                 SendReminder = true
             };
             a.Run();
 
-            var expected = TimeSpan.FromHours(23);
+            var expected = TimeSpan.FromHours(1);
             Assert.Equal(expected, a.TimeoutDuration);
 
             SystemTime.Set(DateTime.Parse("2017-01-01 20:00:00"));
 
+            a.ReminderSent = true;
             a.Call();
+            
 
-            expected = TimeSpan.FromHours(16);
+            expected = TimeSpan.FromHours(4);
             Assert.Equal(expected, a.TimeoutDuration);
 
 
             SystemTime.Reset();
         }
 
-        [Fact]
-        public void StartDate_And_Call()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
-
-            var a = new Activity
-            {
-                StartDate = DateTime.Parse("2017-01-0 00:00:00"),
-                SendReminder = true
-            };
-            a.Run();
-        }
     }
 }

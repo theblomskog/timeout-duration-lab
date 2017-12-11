@@ -12,7 +12,7 @@ namespace TimoutDurationLab.Test
 
         public InitializeDuration(ITestOutputHelper testOutput)
         {
-            
+
             _testOutput = testOutput;
         }
 
@@ -29,10 +29,16 @@ namespace TimoutDurationLab.Test
 
             a.Run();
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
+            //_testOutput.WriteLine("StartDate: {0}", a.StartDate);
+            //_testOutput.WriteLine("EndDate: {0}", a.EndDate);
+            //_testOutput.WriteLine("TotalTimeoutDuration: {0}", a.TotalTimeoutDuration);
+            //_testOutput.WriteLine("ReminderTimeoutDuration: {0}", a.ReminderTimeoutDuration);
 
             var expected = TimeSpan.FromHours(40);
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+
             SystemTime.Reset();
         }
 
@@ -45,36 +51,44 @@ namespace TimoutDurationLab.Test
             {
                 StartDate = SystemTime.Now().Date,
                 EndDate = SystemTime.Now().Date.AddDays(1),
-                SendReminder = true
+                SendReminder = true,
+                ReminderTimeoutDuration = TimeSpan.FromHours(12)
+                
             };
 
             a.Run();
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
+            var expected = TimeSpan.FromHours(4);
+            Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
 
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
-            var expected = TimeSpan.FromHours(28);
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            a.ReminderSent = true;
+            a.Call();
+
+            expected = TimeSpan.FromHours(11);
             Assert.Equal(expected, a.TimeoutDuration);
 
             SystemTime.Reset();
         }
 
         [Fact]
-        public void NoStartDateEndDate_NoReminder_08()
+        public void NoTimeoutOrDate_InvalidOperation()
         {
             SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
 
-            var a = new Activity();
+            var a = new Activity
+            {
 
-            a.Run();
+            };
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
+            var ex = Assert.Throws<InvalidOperationException>(() => a.Run());
 
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
+            Assert.Equal("Timeoutduration is negative", ex.Message);
 
-            var expected = TimeSpan.FromHours(40);
-            Assert.Equal(expected, a.TimeoutDuration);
             SystemTime.Reset();
+
         }
 
         [Fact]
@@ -84,14 +98,13 @@ namespace TimoutDurationLab.Test
 
             var a = new Activity
             {
-                SendReminder = true
+                SendReminder = true,
+                TotalTimeoutDuration = TimeSpan.FromDays(4),
+                ReminderTimeoutDuration = TimeSpan.FromDays(1)
             };
 
             a.Run();
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
-
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
             var expected = TimeSpan.FromHours(28);
             Assert.Equal(expected, a.TimeoutDuration);
 
@@ -111,34 +124,49 @@ namespace TimoutDurationLab.Test
 
             a.Run();
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
-
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
-
             var expected = TimeSpan.FromHours(35);
             Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-01 18:00:00"));
+
+            a.Call();
+
+            expected = TimeSpan.FromHours(30);
+            Assert.Equal(expected, a.TimeoutDuration);
+
             SystemTime.Reset();
         }
 
         [Fact]
-        public void StartDate_EndDate_SendReminder_13()
+        public void StartDate_EndDate_SendReminder_11()
         {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+            SystemTime.Set(DateTime.Parse("2017-01-01 11:00:00"));
 
             var a = new Activity
             {
                 StartDate = SystemTime.Now().Date,
                 EndDate = SystemTime.Now().Date.AddDays(1),
-                SendReminder = true
+                SendReminder = true,
+                ReminderTimeoutDuration = TimeSpan.FromHours(12)
             };
 
             a.Run();
 
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
+            var expected = TimeSpan.FromHours(1);
 
-            _testOutput.WriteLine(a.TimeoutDuration.ToString());
-            var expected = TimeSpan.FromHours(23);
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            a.ReminderSent = true;
+            a.Call();
+
+            expected = TimeSpan.FromHours(11);
+
+            Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+
 
             SystemTime.Reset();
         }
@@ -151,10 +179,12 @@ namespace TimoutDurationLab.Test
             var a = new Activity();
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(35);
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+
             SystemTime.Reset();
         }
 
@@ -169,10 +199,11 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(23);
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
 
             SystemTime.Reset();
         }
@@ -190,10 +221,11 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(4));
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
 
             SystemTime.Reset();
         }
@@ -211,10 +243,11 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(4));
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
 
             SystemTime.Reset();
         }
@@ -230,10 +263,11 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
 
             SystemTime.Reset();
         }
@@ -249,10 +283,13 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(7));
+
             Assert.Equal(expected, a.TimeoutDuration);
+          
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+            Assert.Equal(TimeSpan.FromHours(12), a.ReminderTimeoutDuration);
 
             SystemTime.Reset();
         }
@@ -270,10 +307,12 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(7));
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+            Assert.Equal(default(TimeSpan), a.ReminderTimeoutDuration);
 
             SystemTime.Reset();
         }
@@ -291,10 +330,12 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
             var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
+
             Assert.Equal(expected, a.TimeoutDuration);
+            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
+            Assert.Equal(default(TimeSpan), a.ReminderTimeoutDuration);
 
             SystemTime.Reset();
         }
@@ -313,13 +354,29 @@ namespace TimoutDurationLab.Test
             };
 
             a.Run();
-            _testOutput.WriteLine($"Start delay: {a.StartDelay}");
 
-            var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(7));
+            var expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(2));
+            Assert.Equal(expected, a.StartDelayTimeoutDurationy);
+
+            expected = TimeSpan.FromDays(4);
             Assert.Equal(expected, a.TimeoutDuration);
 
-            expected = TimeSpan.FromHours(16).Add(TimeSpan.FromDays(2));
-            Assert.Equal(expected, a.StartDelay);
+            expected = TimeSpan.FromDays(3);
+            Assert.Equal(expected, a.ReminderTimeoutDuration);
+
+
+            SystemTime.Set(DateTime.Parse("2017-01-04 06:00:00"));
+
+            a.Call();
+
+            Assert.True(a.IsStarted);
+
+            _testOutput.WriteLine("StartDate: {0}", a.StartDate);
+            _testOutput.WriteLine("EndDate: {0}", a.EndDate);
+
+            expected = TimeSpan.FromDays(4) - TimeSpan.FromHours(6);
+            Assert.Equal(expected, a.TimeoutDuration);
+
             SystemTime.Reset();
         }
     }
