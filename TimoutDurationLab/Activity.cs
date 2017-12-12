@@ -15,29 +15,41 @@ namespace TimoutDurationLab
 
         }
 
-
-        public void Call()
+        public void Update()
         {
             SetRemainingTimeoutDuration();
         }
 
+        public bool ShouldSendReminder()
+        {
+            if (SendReminder && !ReminderSent)
+            {
+                var result = RemainingDuration() <= ReminderTimeoutDuration;
+                // TODO: in prod set outside this function
+                ReminderSent = result;
+                return result;
+            }
+            return false;
+        }
 
+
+        private TimeSpan RemainingDuration()
+        {
+            var now = SystemTime.Now();
+            return EndDate.Value + IncludeTimespan - now;
+        }
 
         private void SetRemainingTimeoutDuration()
         {
-            var now = SystemTime.Now();
-
-            // Calculate remaining duration
-            var timeOfday = now.TimeOfDay;
-            var duration = EndDate.Value - StartDate.Value - now.TimeOfDay;
+            var duration = RemainingDuration();
 
             if (SendReminder && !ReminderSent)
             {
-                TimeoutDuration = TimeoutDuration - duration - ReminderTimeoutDuration;
+                TimeoutDuration =  duration - ReminderTimeoutDuration;
             }
             else
             {
-                TimeoutDuration = TimeoutDuration - duration;
+                TimeoutDuration =  duration;
             }
         }
 
@@ -59,7 +71,7 @@ namespace TimoutDurationLab
             if (StartDate.Value > now.Date)
             {
                 StartDelayTimeoutDurationy = StartDate.Value - now;
-                SetTimeoutDuration(default(TimeSpan));
+                SetTimeoutDuration();
             }
             else
             {
@@ -75,19 +87,21 @@ namespace TimoutDurationLab
 
         }
 
-        private void SetTimeoutDuration(TimeSpan timeOfDay)
+        private void SetTimeoutDuration(TimeSpan timeOfDay = default(TimeSpan))
         {
             if (null != EndDate)
             {
                 // sanity check just in case. End date has time part
                 EndDate = EndDate.Value.Date;
-
                 TotalTimeoutDuration = EndDate.Value.AddDays(1) - StartDate.Value;
+
+                // TODO: if end date is sat, calculate inclusive 1 day timespan in duration
+                IncludeTimespan = TimeSpan.FromDays(1);
             }
             else
             {
                 var now = SystemTime.Now();
-                EndDate = now.Add(TotalTimeoutDuration + StartDelayTimeoutDurationy + timeOfDay).Date;
+                EndDate = now.Add(TotalTimeoutDuration + StartDelayTimeoutDurationy - timeOfDay).Date;
             }
 
             if (SendReminder)
@@ -110,6 +124,8 @@ namespace TimoutDurationLab
                 return StartDate.Value <= now.Date;
             }
         }
+
+        protected TimeSpan IncludeTimespan { get; set; }
 
         public DateTime? StartDate { get; set; }
 
