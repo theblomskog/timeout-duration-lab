@@ -59,6 +59,8 @@ namespace TimoutDurationLab.Test
 
             Assert.Equal(TimeSpan.FromHours(6), a.TimeoutDuration);
 
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
             SystemTime.Reset();
         }
 
