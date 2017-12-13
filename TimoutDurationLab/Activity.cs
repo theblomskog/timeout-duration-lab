@@ -33,23 +33,38 @@ namespace TimoutDurationLab
         }
 
 
-        private TimeSpan RemainingDuration()
+        private TimeSpan RemainingDuration(bool includeReminder = false)
         {
+            var duration = default(TimeSpan);
             var now = SystemTime.Now();
-            return EndDate.Value + IncludeTimespan - now;
+            if (null != StartedTime && default(TimeSpan).Equals(IncludeTimespan))
+            {
+                var elapsed = StartedTime.Value - now;
+                duration = TotalTimeoutDuration - elapsed;
+
+            }
+            else
+            {
+                duration = EndDate.Value + IncludeTimespan - now;
+            }
+
+            if (includeReminder)
+            {
+                duration = duration - ReminderTimeoutDuration;
+            }
+
+            return duration;
         }
 
         private void SetRemainingTimeoutDuration()
         {
-            var duration = RemainingDuration();
-
             if (SendReminder && !ReminderSent)
             {
-                TimeoutDuration =  duration - ReminderTimeoutDuration;
+                TimeoutDuration = RemainingDuration(true);
             }
             else
             {
-                TimeoutDuration =  duration;
+                TimeoutDuration = RemainingDuration(); ;
             }
         }
 
@@ -60,6 +75,7 @@ namespace TimoutDurationLab
             if (null == StartDate)
             {
                 StartDate = now.Date;
+                StartedTime = now;
             }
             else
             {
@@ -75,7 +91,7 @@ namespace TimoutDurationLab
             }
             else
             {
-                var timeOfDay = now.TimeOfDay;
+                var timeOfDay = null == StartedTime ? now.TimeOfDay : default(TimeSpan);
                 SetTimeoutDuration(timeOfDay);
             }
 
@@ -124,6 +140,10 @@ namespace TimoutDurationLab
                 return StartDate.Value <= now.Date;
             }
         }
+
+        protected bool HasStartDate { get; set; }
+
+        protected DateTime? StartedTime { get; set; }
 
         protected TimeSpan IncludeTimespan { get; set; }
 

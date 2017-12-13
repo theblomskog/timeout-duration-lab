@@ -19,6 +19,49 @@ namespace TimoutDurationLab.Test
             _testOutput = testOutput;
         }
 
+        [Fact]
+        public void TimeS_12Hour_NoRem()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromHours(12),
+            };
+            a.Run();
+
+            _testOutput.WriteLine($"Duration: {a.TimeoutDuration}");
+            _testOutput.WriteLine($"StartDate: {a.StartDate}");
+            _testOutput.WriteLine($"EndDate: {a.EndDate}");
+
+            Assert.Equal(TimeSpan.FromHours(12), a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_12Hour_SendRem_6Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromHours(12),
+                ReminderTimeoutDuration = TimeSpan.FromHours(6),
+                SendReminder = true
+            };
+
+            a.Run();
+
+            _testOutput.WriteLine($"Duration: {a.TimeoutDuration}");
+            _testOutput.WriteLine($"StartDate: {a.StartDate}");
+            _testOutput.WriteLine($"EndDate: {a.EndDate}");
+
+            Assert.Equal(TimeSpan.FromHours(6), a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
 
         [Fact]
         public void TimeS_7Day_SendRem_3Day_00()
