@@ -24,7 +24,8 @@ namespace TimoutDurationLab
         {
             if (SendReminder && !ReminderSent)
             {
-                var result = RemainingDuration() <= ReminderTimeoutDuration;
+                var duration = RemainingDuration();
+                var result = duration <= ReminderTimeoutDuration;
                 // TODO: in prod set outside this function
                 ReminderSent = result;
                 return result;
@@ -37,9 +38,9 @@ namespace TimoutDurationLab
         {
             var duration = default(TimeSpan);
             var now = SystemTime.Now();
-            if (null != StartedTime && default(TimeSpan).Equals(IncludeTimespan))
+            if (null != StartedTime )
             {
-                var elapsed = StartedTime.Value - now;
+                var elapsed = now - StartedTime.Value;
                 duration = TotalTimeoutDuration - elapsed;
 
             }
@@ -96,9 +97,10 @@ namespace TimoutDurationLab
             }
 
 
-            if (TimeoutDuration < TimeSpan.Zero)
+            if (TimeoutDuration <= TimeSpan.Zero)
             {
-                throw new InvalidOperationException("Timeoutduration is negative");
+                // TODO: Translate message to swedish
+                throw new InvalidOperationException("Duration is zero or negative");
             }
 
         }
@@ -110,6 +112,10 @@ namespace TimoutDurationLab
                 // sanity check just in case. End date has time part
                 EndDate = EndDate.Value.Date;
                 TotalTimeoutDuration = EndDate.Value.AddDays(1) - StartDate.Value;
+                if (null != StartedTime)
+                {
+                    TotalTimeoutDuration = TotalTimeoutDuration - StartedTime.Value.TimeOfDay;
+                }
 
                 // TODO: if end date is sat, calculate inclusive 1 day timespan in duration
                 IncludeTimespan = TimeSpan.FromDays(1);

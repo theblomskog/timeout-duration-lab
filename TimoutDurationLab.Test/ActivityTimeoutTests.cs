@@ -20,145 +20,6 @@ namespace TimoutDurationLab.Test
         }
 
         [Fact]
-        public void TimeS_12Hour_NoRem()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromHours(12),
-            };
-            a.Run();
-
-            _testOutput.WriteLine($"Duration: {a.TimeoutDuration}");
-            _testOutput.WriteLine($"StartDate: {a.StartDate}");
-            _testOutput.WriteLine($"EndDate: {a.EndDate}");
-
-            Assert.Equal(TimeSpan.FromHours(12), a.TimeoutDuration);
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
-        public void TimeS_12Hour_SendRem_6Hour()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromHours(12),
-                ReminderTimeoutDuration = TimeSpan.FromHours(6),
-                SendReminder = true
-            };
-
-            a.Run();
-
-            _testOutput.WriteLine($"Duration: {a.TimeoutDuration}");
-            _testOutput.WriteLine($"StartDate: {a.StartDate}");
-            _testOutput.WriteLine($"EndDate: {a.EndDate}");
-
-            Assert.Equal(TimeSpan.FromHours(6), a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
-
-            SystemTime.Reset();
-        }
-
-
-        [Fact]
-        public void TimeS_7Day_SendRem_3Day_00()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 00:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(7),
-                ReminderTimeoutDuration = TimeSpan.FromDays(3),
-                SendReminder = true
-            };
-            a.Run();
-
-
-            var expected = TimeSpan.FromDays(4);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-05 00:00:00"));
-
-            // Reminder should have been sent and sat to true at 2017-01-05 00:00:00
-            // update ReminderSent
-            Assert.True(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromDays(3);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
-        public void TimeS_3Day_SendRem_12Hour()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(3),
-                ReminderTimeoutDuration = TimeSpan.FromHours(12),
-                SendReminder = true
-            };
-            a.Run();
-
-
-            var expected = TimeSpan.FromHours(4).Add(TimeSpan.FromDays(2));
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-03 18:00:00"));
-
-            // Reminder should have been sent and sat to true at 2017-01-03 12:00:00
-            // update ReminderSent
-            Assert.True(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromHours(6);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
-        public void TimeS_1Day_SendRem_12Hour()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 11:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(1),
-                ReminderTimeoutDuration = TimeSpan.FromHours(12),
-                SendReminder = true
-            };
-            a.Run();
-
-            var expected = TimeSpan.FromHours(1);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-01 20:00:00"));
-
-            // Reminder should have been sent and sat to true at 12:00:00
-            // update ReminderSent
-            Assert.True(a.ShouldSendReminder());
-            a.Update();
-
-
-            expected = TimeSpan.FromHours(4);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
         public void StartDT_EndDateDT_NoRem()
         {
             SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
@@ -231,104 +92,10 @@ namespace TimoutDurationLab.Test
 
             var ex = Assert.Throws<InvalidOperationException>(() => a.Run());
 
-            Assert.Equal("Timeoutduration is negative", ex.Message);
+            Assert.Equal("Duration is zero or negative", ex.Message);
 
             SystemTime.Reset();
 
-        }
-
-        [Fact]
-        public void TimeS_7Day_SendRem_3Day()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(7),
-                ReminderTimeoutDuration = TimeSpan.FromDays(3),
-                SendReminder = true
-            };
-
-            a.Run();
-
-            var expected = TimeSpan.FromHours(11).Add(TimeSpan.FromDays(3));
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-04 13:00:00"));
-
-            Assert.False(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromHours(11);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-05 13:00:00"));
-
-            // update ReminderSent
-            Assert.True(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromDays(2).Add(TimeSpan.FromHours(11));
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
-        public void TimeS_7Day_NoRem()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(7),
-            };
-
-            a.Run();
-
-            var expected = TimeSpan.FromDays(6).Add(TimeSpan.FromHours(11));
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-07 13:00:00"));
-
-            Assert.False(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromHours(11);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Reset();
-        }
-
-        [Fact]
-        public void TimeS_7Day_SendRem_0Hour()
-        {
-            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
-
-            var a = new Activity
-            {
-                TotalTimeoutDuration = TimeSpan.FromDays(7),
-                ReminderTimeoutDuration = default(TimeSpan),
-                SendReminder = true
-            };
-
-            a.Run();
-
-            var expected = TimeSpan.FromDays(6).Add(TimeSpan.FromHours(11));
-
-            Assert.Equal(expected, a.TimeoutDuration);
-            Assert.Equal(default(TimeSpan), a.StartDelayTimeoutDurationy);
-            Assert.Equal(default(TimeSpan), a.ReminderTimeoutDuration);
-
-            SystemTime.Set(DateTime.Parse("2017-01-07 13:00:00"));
-
-            Assert.False(a.ShouldSendReminder());
-            a.Update();
-
-            expected = TimeSpan.FromHours(11);
-            Assert.Equal(expected, a.TimeoutDuration);
-
-            SystemTime.Reset();
         }
 
         [Fact]
@@ -417,5 +184,324 @@ namespace TimoutDurationLab.Test
 
             SystemTime.Reset();
         }
+
+        [Fact]
+        public void EndDT_3Day_SendRem_1Day()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                EndDate = DateTime.Parse("2017-01-04 00:00:00"),
+                ReminderTimeoutDuration = TimeSpan.FromDays(1),
+                SendReminder = true
+            };
+
+            a.Run();
+
+            var expected = TimeSpan.FromDays(2).Add(TimeSpan.FromHours(16));
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            //
+            SystemTime.Set(DateTime.Parse("2017-01-03 07:00:00"));
+
+            Assert.False(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(17);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            //
+            SystemTime.Set(DateTime.Parse("2017-01-04 00:00:00"));
+            // update ReminderSent
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromDays(1);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void StartDT_Today_TimeS_1Day_SendRem_12Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                StartDate = SystemTime.Now().Date,
+                SendReminder = true,
+                ReminderTimeoutDuration = TimeSpan.FromHours(12),
+                TotalTimeoutDuration = TimeSpan.FromDays(1)
+            };
+
+            a.Run();
+
+            // Since start date is sat, duration will be calculated from 2017-01-01 00:00:00
+            var expected = TimeSpan.FromHours(4);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            //
+            SystemTime.Set(DateTime.Parse("2017-01-01 12:00:00"));
+
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(12);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_7Day_SendRem_3Day()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(7),
+                ReminderTimeoutDuration = TimeSpan.FromDays(3),
+                SendReminder = true
+            };
+
+            a.Run();
+
+            var expected = TimeSpan.FromDays(4);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-04 13:00:00"));
+
+            Assert.False(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(24);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-05 13:00:00"));
+
+            // update ReminderSent
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromDays(3);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_7Day_NoRem()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(7),
+            };
+
+            a.Run();
+
+            var expected = TimeSpan.FromDays(7);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-07 13:00:00"));
+
+            Assert.False(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(24);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-08 00:00:00"));
+
+            Assert.False(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(13);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_7Day_SendRem_0Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 13:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(7),
+                ReminderTimeoutDuration = default(TimeSpan),
+                SendReminder = true
+            };
+
+            a.Run();
+
+            var expected = TimeSpan.FromDays(7);
+
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-07 18:00:00"));
+
+            Assert.False(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(19);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_12Hour_NoRem()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromHours(12),
+            };
+
+            a.Run();
+
+            Assert.Equal(TimeSpan.FromHours(12), a.TimeoutDuration);
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_12Hour_SendRem_6Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromHours(12),
+                ReminderTimeoutDuration = TimeSpan.FromHours(6),
+                SendReminder = true
+            };
+
+            a.Run();
+
+            Assert.Equal(TimeSpan.FromHours(6), a.TimeoutDuration);
+
+            //
+            SystemTime.Set(DateTime.Parse("2017-01-01 14:00:00"));
+
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+            Assert.Equal(TimeSpan.FromHours(6), a.TimeoutDuration);
+
+            //
+            SystemTime.Set(DateTime.Parse("2017-01-01 17:00:00"));
+
+            a.Update();
+            Assert.Equal(TimeSpan.FromHours(3), a.TimeoutDuration);
+
+            // Clean up
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_7Day_SendRem_3Day_00()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 00:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(7),
+                ReminderTimeoutDuration = TimeSpan.FromDays(3),
+                SendReminder = true
+            };
+            a.Run();
+
+
+            var expected = TimeSpan.FromDays(4);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-05 00:00:00"));
+
+            // Reminder should have been sent and sat to true at 2017-01-05 00:00:00
+            // update ReminderSent
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromDays(3);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_3Day_SendRem_12Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 08:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(3),
+                ReminderTimeoutDuration = TimeSpan.FromHours(12),
+                SendReminder = true
+            };
+            a.Run();
+
+
+            var expected = TimeSpan.FromDays(2).Add(TimeSpan.FromHours(12));
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-03 18:00:00"));
+
+            a.Update();
+            expected = TimeSpan.FromHours(2);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-03 20:00:00"));
+            // Reminder should have been sent and sat to true at 2017-01-03 20:00:00
+            // update ReminderSent
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+            expected = TimeSpan.FromHours(12);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+
+            SystemTime.Reset();
+        }
+
+        [Fact]
+        public void TimeS_1Day_SendRem_12Hour()
+        {
+            SystemTime.Set(DateTime.Parse("2017-01-01 11:00:00"));
+
+            var a = new Activity
+            {
+                TotalTimeoutDuration = TimeSpan.FromDays(1),
+                ReminderTimeoutDuration = TimeSpan.FromHours(12),
+                SendReminder = true
+            };
+            a.Run();
+
+            var expected = TimeSpan.FromHours(12);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+            SystemTime.Set(DateTime.Parse("2017-01-01 23:00:00"));
+
+            // Reminder should have been sent and sat to true at 23:00:00
+            // update ReminderSent
+            Assert.True(a.ShouldSendReminder());
+            a.Update();
+
+
+            expected = TimeSpan.FromHours(12);
+            Assert.Equal(expected, a.TimeoutDuration);
+
+
+            SystemTime.Reset();
+        }
+
+
     }
 }
